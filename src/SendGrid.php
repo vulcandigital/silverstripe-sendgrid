@@ -4,6 +4,7 @@ namespace Vulcan\SendGrid;
 
 use SendGrid\Personalization;
 use SendGrid\Response;
+use SendGrid\SandBoxMode;
 use SilverStripe\Assets\File;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
@@ -79,6 +80,9 @@ class SendGrid
     /** @var int */
     protected $sendAt;
 
+    /** @var bool */
+    protected $sandbox = false;
+
     /**
      * SendGrid constructor.
      */
@@ -141,6 +145,15 @@ class SendGrid
 
         if ($this->getSchedule()) {
             $mail->setSendAt($this->getSchedule());
+        }
+
+        if ($this->isSandbox()) {
+            $settings = new \SendGrid\MailSettings();
+            $sandbox = new SandBoxMode();
+            $sandbox->setEnable(true);
+            $settings->setSandboxMode($sandbox);
+
+            $mail->setMailSettings($settings);
         }
 
         $mail->setTemplateId($this->getTemplateId());
@@ -252,6 +265,10 @@ class SendGrid
 
         if (!$this->getTemplateId()) {
             throw new \InvalidArgumentException('You must provide a template id');
+        }
+
+        if (!$this->getBody()) {
+            throw new \InvalidArgumentException('You must provide a body');
         }
 
         if ($this->attachments->count()) {
@@ -545,5 +562,25 @@ class SendGrid
     public function getAttachments()
     {
         return $this->attachments;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSandbox()
+    {
+        return $this->sandbox;
+    }
+
+    /**
+     * @param bool $sandbox
+     *
+     * @return $this
+     */
+    public function setSandboxMode($sandbox)
+    {
+        $this->sandbox = $sandbox;
+
+        return $this;
     }
 }
