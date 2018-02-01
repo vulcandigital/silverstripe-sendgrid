@@ -11,6 +11,7 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\ArrayLib;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\View\ArrayData;
 use Vulcan\SendGrid\Exceptions\SendGridException;
@@ -75,6 +76,9 @@ class SendGrid
      */
     protected $attachments;
 
+    /** @var int */
+    protected $sendAt;
+
     /**
      * SendGrid constructor.
      */
@@ -133,6 +137,10 @@ class SendGrid
                 'type'     => $attachment->Type,
                 'filename' => $attachment->Filename
             ]);
+        }
+
+        if ($this->getSchedule()) {
+            $mail->setSendAt($this->getSchedule());
         }
 
         $mail->setTemplateId($this->getTemplateId());
@@ -252,7 +260,7 @@ class SendGrid
                 $size += $attachment->Size;
             }
 
-            if ($size = round(($size/(1024*1024))*10)/10 > 30) {
+            if ($size = round(($size / (1024 * 1024)) * 10) / 10 > 30) {
                 throw new \RuntimeException("The total size of your attachments exceed SendGrid's imposed limit of 30 MB [Currently: $size MB]");
             }
         }
@@ -333,7 +341,39 @@ class SendGrid
     }
 
     /**
-     * @return mixed
+     * Delay sending of the email until the specified time. It is important that you have
+     * specified your correct timezone in your SendGrid account's settings, otherwise this may have
+     * unexpected results.
+     *
+     * @param int|DBDatetime $timestamp
+     *
+     * @return $this
+     */
+    public function setScheduleTo($timestamp)
+    {
+        if ($timestamp instanceof DBDatetime) {
+            $timestamp = $timestamp->getTimestamp();
+        }
+
+        if ($timestamp <= DBDatetime::now()->getTimestamp()) {
+            throw new \RuntimeException('The scheduled date must be in the future. Please check your timezone settings');
+        }
+
+        $this->sendAt = $timestamp;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSchedule()
+    {
+        return $this->sendAt;
+    }
+
+    /**
+     * @return string
      */
     public function getSubject()
     {

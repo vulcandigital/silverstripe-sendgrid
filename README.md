@@ -55,6 +55,19 @@ $sendgrid->addAttachment(Controller::join_links(Director::baseFolder(), '/path/t
 If you provide `$filename`, make sure you provide the correct extension as well to prevent any errors
 
 If the provided file is a `File` object and `$forcePublish` is set to `true` _and_ the `File` you have provided has not been published, it will be forcibly published.
- 
+
+### Scheduling
+You can schedule emails to be sent at a later date:
+
+```php
+$sendGrid->setScheduleTo(DBDatetime::now()->getTimestamp() + 3600); // Schedule to send in 1 hour
+```
+
+> **Important:** Ensure that you have specified your correct timezone in your SendGrid account's settings, otherwise this may have unexpected results.
+> 
+> Your database timezone should also match the timezone you have specified in your account. See [Core Environment Variables](https://docs.silverstripe.org/en/4/getting_started/environment_management/#core-environment-variables) for information on how to modify the timezone used by your database.
+>
+> It is always advised when dealing with dates and times in SilverStripe to use the functionality it has provided you as shown in the example above.
+
 ## License
 [BSD-3-Clause](LICENSE.md) - [Vulcan Digital Ltd](https://vulcandigital.co.nz)
