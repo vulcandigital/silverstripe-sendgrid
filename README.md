@@ -69,5 +69,11 @@ $sendGrid->setScheduleTo(DBDatetime::now()->getTimestamp() + 3600); // Schedule 
 >
 > It is always advised when dealing with dates and times in SilverStripe to use the functionality it has provided you as shown in the example above.
 
+### Sandbox Mode
+```php
+$sendGrid->setSandboxMode(true);
+```
+If everything is OK, $sendGrid->send() will return true otherwise an error will be thrown.
+
 ## License
 [BSD-3-Clause](LICENSE.md) - [Vulcan Digital Ltd](https://vulcandigital.co.nz)
