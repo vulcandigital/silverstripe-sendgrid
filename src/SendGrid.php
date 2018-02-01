@@ -86,6 +86,8 @@ class SendGrid
     }
 
     /**
+     * Send the email
+     *
      * @throws SendGridException
      */
     public function send()
@@ -127,8 +129,8 @@ class SendGrid
 
         foreach ($this->getAttachments() as $attachment) {
             $mail->addAttachment([
-                'content' => $attachment->Content,
-                'type' => $attachment->Type,
+                'content'  => $attachment->Content,
+                'type'     => $attachment->Type,
                 'filename' => $attachment->Filename
             ]);
         }
@@ -150,13 +152,49 @@ class SendGrid
     }
 
     /**
-     * @param File        $file         The file object to attach to the email.
+     * Handles adding file attachments to the email
+     *
+     * @param File|string $file         The file object to attach to the email, or an absolute path to a file
      * @param null|string $filename     The name of the file, must include extension. Will default to current filename
-     * @param bool        $forcePublish If the provided file is unpublished, setting this to true will publish it forcibly, immediately
+     * @param bool        $forcePublish Only applicable if the provided file is a {@link File} object. If the provided file is unpublished,
+     *                                  setting this to true will publish it forcibly, immediately
      *
      * @return $this
      */
-    public function addAttachment(File $file, $filename = null, $forcePublish = false)
+    public function addAttachment($file, $filename = null, $forcePublish = false)
+    {
+        if ($file instanceof File) {
+            return $this->addFileAsAttachment($file, $filename, $forcePublish);
+        }
+
+        if (!file_exists($file)) {
+            throw new \InvalidArgumentException("That file [$file] does not exist");
+        }
+
+        if (!is_readable($file)) {
+            throw new \InvalidArgumentException("That file [$file] exists, but is not readable");
+        }
+
+        $this->attachments->push([
+            'Content'  => base64_encode(file_get_contents($file)),
+            'Type'     => mime_content_type($file),
+            'Filename' => ($filename) ? $filename : basename($file),
+            'Size'     => filesize($file)
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Handles adding {@link File} objects as attachments
+     *
+     * @param File $file
+     * @param      $filename
+     * @param      $forcePublish
+     *
+     * @return $this
+     */
+    private function addFileAsAttachment(File $file, $filename, $forcePublish)
     {
         if (!$file->isPublished()) {
             if (!$forcePublish) {
@@ -207,9 +245,22 @@ class SendGrid
         if (!$this->getTemplateId()) {
             throw new \InvalidArgumentException('You must provide a template id');
         }
+
+        if ($this->attachments->count()) {
+            $size = 0;
+            foreach ($this->attachments as $attachment) {
+                $size += $attachment->Size;
+            }
+
+            if ($size = round(($size/(1024*1024))*10)/10 > 30) {
+                throw new \RuntimeException("The total size of your attachments exceed SendGrid's imposed limit of 30 MB [Currently: $size MB]");
+            }
+        }
     }
 
     /**
+     * Get the recipient list
+     *
      * @return ArrayList
      */
     public function getRecipients()
