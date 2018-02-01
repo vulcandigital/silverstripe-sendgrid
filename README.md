@@ -31,10 +31,23 @@ $sendGrid->addRecipient('reece@vulcandigital.co.nz', 'Reece Alexander', [
 ]);
 $sendGrid->setBody("<p>We thought you'd like this awesome t-shirt!</p>");
 $sendGrid->setTemplateId('your-template-id');
+$sendGrid->addAttachment(Image::get()->first());
 $sendGrid->send();
 ```
 
 You can add as many recipients as you want.
 
+### Attachments
+You can add as many attachments you want totalling up to 30 MB. The attachment must be a `File` subclass such as itself or `Image`.
+
+```php
+$file = Image::get()->first();
+$sendGrid->addAttachment($file, $filename = null, $forcePublish = false); 
+```
+
+If you provide `$filename`, make sure you provide the correct extension as well to prevent any errors
+
+If you provide `$forcePublish` if the `File` you have provided has not be published, it will be forcibly published
+ 
 ## License
 [BSD-3-Clause](LICENSE.md) - [Vulcan Digital Ltd](https://vulcandigital.co.nz)
