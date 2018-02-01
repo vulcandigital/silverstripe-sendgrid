@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/vulcandigital/silverstripe-sendgrid.svg?branch=master)](https://travis-ci.org/vulcandigital/silverstripe-sendgrid)
+[![Build Status](https://travis-ci.org/vulcandigital/silverstripe-sendgrid.svg?branch=master)](https://travis-ci.org/vulcandigital/silverstripe-sendgrid) [![codecov](https://codecov.io/gh/vulcandigital/silverstripe-sendgrid/branch/master/graph/badge.svg)](https://codecov.io/gh/vulcandigital/silverstripe-sendgrid) [![Latest Stable Version](https://poser.pugx.org/vulcandigital/silverstripe-sendgrid/v/stable)](https://packagist.org/packages/vulcandigital/silverstripe-sendgrid) [![Total Downloads](https://poser.pugx.org/vulcandigital/silverstripe-sendgrid/downloads)](https://packagist.org/packages/vulcandigital/silverstripe-sendgrid) [![License](https://poser.pugx.org/vulcandigital/silverstripe-sendgrid/license)](https://packagist.org/packages/vulcandigital/silverstripe-sendgrid)
 
 ## silverstripe-sendgrid
 A module to assist developers in sending template emails via SendGrid
@@ -38,7 +38,7 @@ $sendGrid->send();
 You can add as many recipients as you want.
 
 ### Attachments
-You can add as many attachments you want totalling up to 30 MB. The attachment must be a `File` object or a subclass of it such as itself or `Image`.
+You can add as many attachments as you want totalling up to 30 MB. The attachment must be a `File` object or a subclass of it such as itself or `Image`.
 
 ```php
 $file = Image::get()->first();
