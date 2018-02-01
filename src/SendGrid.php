@@ -4,6 +4,9 @@ namespace Vulcan\SendGrid;
 
 use SendGrid\Personalization;
 use SendGrid\Response;
+use SilverStripe\Assets\File;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\ArrayLib;
@@ -16,7 +19,7 @@ use Vulcan\SendGrid\Exceptions\SendGridException;
  * Class SendGrid
  * @package Vulcan\SendGrid
  *
- * @author Reece Alexander <reece@vulcandigital.co.nz>
+ * @author  Reece Alexander <reece@vulcandigital.co.nz>
  */
 class SendGrid
 {
@@ -68,11 +71,17 @@ class SendGrid
     protected $body;
 
     /**
+     * @var ArrayList
+     */
+    protected $attachments;
+
+    /**
      * SendGrid constructor.
      */
     public function __construct()
     {
         $this->to = ArrayList::create();
+        $this->attachments = ArrayList::create();
         $this->sendGrid = new \SendGrid($this->getApiKey());
     }
 
@@ -101,7 +110,7 @@ class SendGrid
             } else {
                 $personalization = new \SendGrid\Personalization();
                 $to = new \SendGrid\Email($recipient->Name, $recipient->Email);
-                $personalization->addBcc($to);
+                $personalization->addTo($to);
                 $personalization->setSubject($this->getSubject());
             }
 
@@ -109,13 +118,24 @@ class SendGrid
                 $personalization->addSubstitution($map['Key'], $map['Value']);
             }
 
-            $mail->addPersonalization($personalization);
+            if ($i !== 0) {
+                $mail->addPersonalization($personalization);
+            }
 
             $i++;
         }
 
+        foreach ($this->getAttachments() as $attachment) {
+            $mail->addAttachment([
+                'content' => $attachment->Content,
+                'type' => $attachment->Type,
+                'filename' => $attachment->Filename
+            ]);
+        }
+
         $mail->setTemplateId($this->getTemplateId());
 
+        /** @var Response $response */
         $response = $this->sendGrid->client->mail()->send()->post($mail);
 
         // 2xx responses indicate success
@@ -125,6 +145,43 @@ class SendGrid
             $definition = $this->getErrorDefinition($response->statusCode());
             throw new SendGridException(sprintf('[Response: %s - %s] %s', $definition->Code, $definition->Message, $definition->Reason));
         }
+
+        return true;
+    }
+
+    /**
+     * @param File        $file         The file object to attach to the email.
+     * @param null|string $filename     The name of the file, must include extension. Will default to current filename
+     * @param bool        $forcePublish If the provided file is unpublished, setting this to true will publish it forcibly, immediately
+     *
+     * @return $this
+     */
+    public function addAttachment(File $file, $filename = null, $forcePublish = false)
+    {
+        if (!$file->isPublished()) {
+            if (!$forcePublish) {
+                throw new \InvalidArgumentException("That file [$file->Filename] is not published, and won't be visible to the recipient, please publish the image first or toggle the forcePublish parameter");
+            }
+
+            $file->publishSingle();
+        }
+
+        $path = Controller::join_links(Director::baseFolder(), $file->Link());
+
+        if (!file_exists($path)) {
+            throw new \InvalidArgumentException("That attachments represents a file that does not exist [$path]");
+        }
+
+        $contents = base64_encode(file_get_contents($path));
+
+        $this->attachments->push([
+            'Content'  => $contents,
+            'Type'     => $file->getMimeType(),
+            'Filename' => ($filename) ? $filename : basename($file->Filename),
+            'Size'     => $file->getAbsoluteSize()
+        ]);
+
+        return $this;
     }
 
     /**
@@ -135,7 +192,7 @@ class SendGrid
      */
     public function validate()
     {
-        if (!$this->getFromName()) {
+        if (!$this->getFrom()) {
             throw new \InvalidArgumentException('You must set the from address');
         }
 
@@ -195,11 +252,11 @@ class SendGrid
             ];
         }
 
-        $this->to->add([
+        $this->to->push(ArrayData::create([
             'Email'            => $to,
             'Name'             => $name,
-            'Personalizations' => $personalizations
-        ]);
+            'Personalizations' => $data
+        ]));
 
         return $this;
     }
@@ -304,7 +361,9 @@ class SendGrid
     public function setBody($body)
     {
         if ($body instanceof DBHTMLText) {
-            $this->body = $body->getValue();
+            $this->body = $body->RAW();
+
+            return $this;
         }
 
         $this->body = $body;
@@ -387,5 +446,13 @@ class SendGrid
         }
 
         return $record;
+    }
+
+    /**
+     * @return ArrayList
+     */
+    public function getAttachments()
+    {
+        return $this->attachments;
     }
 }

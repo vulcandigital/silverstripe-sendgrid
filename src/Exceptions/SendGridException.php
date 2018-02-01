@@ -2,4 +2,6 @@
 
 namespace Vulcan\SendGrid\Exceptions;
 
-class SendGridException extends \Exception {}
+class SendGridException extends \Exception
+{
+}

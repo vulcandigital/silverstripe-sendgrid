@@ -34,12 +34,15 @@ class SendGridTest extends FunctionalTest
         SendGrid::config()->set('api_key', $this->originalKey);
     }
 
-    public function testSendGrid()
+    public function testBody()
     {
-        $dbHtmlText = DBHTMLText::create("<p>Hello World</p>");
+        $dbHtmlText = DBHTMLText::create()->setValue("<p>Hello World</p>");
         $this->sendGrid->setBody($dbHtmlText);
         $this->assertEquals("<p>Hello World</p>", $this->sendGrid->getBody(), 'When setBody is passed a DBHTMLText object, it should automatically convert that object to string');
+    }
 
+    public function testRecipients()
+    {
         $this->sendGrid->addRecipient('reece@vulcandigital.co.nz', 'Reece Alexander', [':salutation' => 'Mr']);
 
         /** @var ArrayData $recipient */
