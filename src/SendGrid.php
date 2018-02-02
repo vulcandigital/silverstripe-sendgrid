@@ -62,6 +62,7 @@ class SendGrid
      * @var string
      */
     protected $replyTo;
+
     /**
      * @var string
      */
@@ -77,13 +78,19 @@ class SendGrid
      */
     protected $attachments;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     protected $sendAt;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     protected $sandbox = false;
 
-    /** @var ArrayList */
+    /**
+     * @var ArrayList
+     */
     protected $customArgs;
 
     /**
@@ -533,18 +540,18 @@ class SendGrid
     public function getErrorMap()
     {
         $map = [
-            ['Code' => 200, 'Message' => 'OK', 'Reason' => 'Your message is valid, but it is not queued to be delivered.'],
-            ['Code' => 202, 'Message' => 'ACCEPTED', 'Reason' => 'Your message is both valid, and queued to be delivered.'],
-            ['Code' => 400, 'Message' => 'BAD REQUEST', 'Reason' => ''],
-            ['Code' => 401, 'Message' => 'UNAUTHORIZED', 'Reason' => 'You do not have authorization to make the request.'],
-            ['Code' => 403, 'Message' => 'FORBIDDEN', 'Reason' => ''],
-            ['Code' => 404, 'Message' => 'NOT FOUND', 'Reason' => 'The resource you tried to locate could not be found or does not exist.'],
-            ['Code' => 405, 'Message' => 'METHOD NOT ALLOWED', 'Reason' => ''],
-            ['Code' => 413, 'Message' => 'PAYLOAD TOO LARGE', 'Reason' => 'The JSON payload you have included in your request is too large.'],
-            ['Code' => 415, 'Message' => 'UNSUPPORTED MEDIA TYPE', 'Reason' => ''],
-            ['Code' => 429, 'Message' => 'TOO MANY REQUESTS', 'Reason' => 'The number of requests you have made exceeds SendGrid’s rate limitations'],
-            ['Code' => 500, 'Message' => 'SERVER UNAVAILABLE', 'Reason' => 'An error occurred on a SendGrid server.'],
-            ['Code' => 503, 'Message' => 'SERVICE NOT AVAILABLE', 'Reason' => 'The SendGrid v3 Web API is not available.']
+            ArrayData::create(['Code' => 200, 'Message' => 'OK', 'Reason' => 'Your message is valid, but it is not queued to be delivered.']),
+            ArrayData::create(['Code' => 202, 'Message' => 'ACCEPTED', 'Reason' => 'Your message is both valid, and queued to be delivered.']),
+            ArrayData::create(['Code' => 400, 'Message' => 'BAD REQUEST', 'Reason' => '']),
+            ArrayData::create(['Code' => 401, 'Message' => 'UNAUTHORIZED', 'Reason' => 'You do not have authorization to make the request.']),
+            ArrayData::create(['Code' => 403, 'Message' => 'FORBIDDEN', 'Reason' => '']),
+            ArrayData::create(['Code' => 404, 'Message' => 'NOT FOUND', 'Reason' => 'The resource you tried to locate could not be found or does not exist.']),
+            ArrayData::create(['Code' => 405, 'Message' => 'METHOD NOT ALLOWED', 'Reason' => '']),
+            ArrayData::create(['Code' => 413, 'Message' => 'PAYLOAD TOO LARGE', 'Reason' => 'The JSON payload you have included in your request is too large.']),
+            ArrayData::create(['Code' => 415, 'Message' => 'UNSUPPORTED MEDIA TYPE', 'Reason' => '']),
+            ArrayData::create(['Code' => 429, 'Message' => 'TOO MANY REQUESTS', 'Reason' => 'The number of requests you have made exceeds SendGrid’s rate limitations']),
+            ArrayData::create(['Code' => 500, 'Message' => 'SERVER UNAVAILABLE', 'Reason' => 'An error occurred on a SendGrid server.']),
+            ArrayData::create(['Code' => 503, 'Message' => 'SERVICE NOT AVAILABLE', 'Reason' => 'The SendGrid v3 Web API is not available.']),
         ];
 
         return ArrayList::create($map);
