@@ -11,8 +11,7 @@ use Vulcan\SendGrid\SendGrid;
 /**
  * Class SendGridTest
  * @package Vulcan\SendGrid\Tests
- *
- * @covers  SendGrid::
+ * @covers  \Vulcan\SendGrid\SendGrid
  */
 class SendGridTest extends FunctionalTest
 {
@@ -49,8 +48,8 @@ class SendGridTest extends FunctionalTest
     }
 
     /**
-     * @covers SendGrid::setBody()
-     * @covers SendGrid::getBody()
+     * @covers \Vulcan\SendGrid\SendGrid::setBody()
+     * @covers \Vulcan\SendGrid\SendGrid::getBody()
      */
     public function testBody()
     {
@@ -60,8 +59,8 @@ class SendGridTest extends FunctionalTest
     }
 
     /**
-     * @covers SendGrid::addRecipient()
-     * @covers SendGrid::getRecipients()
+     * @covers \Vulcan\SendGrid\SendGrid::addRecipient()
+     * @covers \Vulcan\SendGrid\SendGrid::getRecipients()
      */
     public function testRecipients()
     {
@@ -89,8 +88,8 @@ class SendGridTest extends FunctionalTest
     }
 
     /**
-     * @covers SendGrid::setScheduleTo()
-     * @covers SendGrid::getSchedule()
+     * @covers \Vulcan\SendGrid\SendGrid::setScheduleTo()
+     * @covers \Vulcan\SendGrid\SendGrid::getSchedule()
      */
     public function testScheduling()
     {
@@ -107,10 +106,11 @@ class SendGridTest extends FunctionalTest
     }
 
     /**
-     * @covers SendGrid::send()
-     * @covers SendGrid::setSandboxMode()
-     * @covers SendGrid::setTemplateId()
-     * @covers SendGrid::setFrom()
+     * @covers \Vulcan\SendGrid\SendGrid::send()
+     * @covers \Vulcan\SendGrid\SendGrid::setSandboxMode()
+     * @covers \Vulcan\SendGrid\SendGrid::setTemplateId()
+     * @covers \Vulcan\SendGrid\SendGrid::setFrom()
+     * @covers \Vulcan\SendGrid\SendGrid::addCustomArg()
      */
     public function testSend()
     {
@@ -129,7 +129,32 @@ class SendGridTest extends FunctionalTest
         $this->sendGrid->setSubject('Just testing...');
         $this->sendGrid->setBody('<p>Lorem ipsum dolor sit amet.</p>');
         $this->sendGrid->setTemplateId(getenv('SG_TEMPLATE_ID'));
+        $this->sendGrid->addCustomArg(':year', DBDatetime::now()->Year());
 
         $this->assertTrue($this->sendGrid->send());
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::addCustomArg()
+     * @covers \Vulcan\SendGrid\SendGrid::getCustomArgs()
+     */
+    public function testCustomArgs()
+    {
+        $this->sendGrid->addCustomArg(':name', 'Reece Alexander');
+
+        /** @var ArrayData $first */
+        $first = $this->sendGrid->getCustomArgs()->first();
+
+        $this->assertEquals([
+            'Key'   => ':name',
+            'Value' => 'Reece Alexander'
+        ], $first->toMap());
+
+        try {
+            $this->sendGrid->addCustomArg(':name', 'Reece Alexander');
+            $this->fail('You should not be able to add the same customArg key twice');
+        } catch (\Exception $e) {
+            $this->assertTrue(true);
+        }
     }
 }

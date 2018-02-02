@@ -37,6 +37,34 @@ $sendGrid->send();
 
 You can add as many recipients as you want.
 
+## Substitutions & Custom Arguments
+Substitutions and custom arguments are practically the same thing, the only difference is that custom arguments are applied globally regardless of the recipient where substitutions are variable replacements that can differ per recipient.
+
+> Substitutions will always override any custom argument
+
+### Substitutions
+Substitutions are variables that can be replaced per recipient
+
+```php
+$sendGrid->addRecipient('john@doe.com', 'John Doe', [
+    ':salutation' => 'Mr',
+    ':first_name' => 'John',
+    ':last_name' => 'Doe'
+]);
+$sendGrid->addRecipient('jane@doe.com', 'Jane Doe', [
+    ':salutation' => 'Mrs',
+    ':first_name' => 'Jane',
+    ':last_name' => 'Doe'
+]);
+```
+
+### Custom Arguments
+Custom arguments are applied globally across all recipients unless a substitution has overridden it
+
+```php
+$sendGrid->addCustomArg(':year', DBDatetime::now()->Year());
+```
+
 ### Attachments
 You can add as many attachments as you want totalling up to 30 MB. The attachment must be a `File` object or a subclass of it such as itself or `Image`.
 

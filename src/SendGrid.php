@@ -83,6 +83,9 @@ class SendGrid
     /** @var bool */
     protected $sandbox = false;
 
+    /** @var ArrayList */
+    protected $customArgs;
+
     /**
      * SendGrid constructor.
      */
@@ -90,6 +93,7 @@ class SendGrid
     {
         $this->to = ArrayList::create();
         $this->attachments = ArrayList::create();
+        $this->customArgs = ArrayList::create();
         $this->sendGrid = new \SendGrid($this->getApiKey());
     }
 
@@ -154,6 +158,12 @@ class SendGrid
             $settings->setSandboxMode($sandbox);
 
             $mail->setMailSettings($settings);
+        }
+
+        if ($this->getCustomArgs()->count()) {
+            foreach ($this->getCustomArgs() as $customArg) {
+                $mail->addCustomArg($customArg->Key, $customArg->Value);
+            }
         }
 
         $mail->setTemplateId($this->getTemplateId());
@@ -580,6 +590,41 @@ class SendGrid
     public function setSandboxMode($sandbox)
     {
         $this->sandbox = $sandbox;
+
+        return $this;
+    }
+
+    /**
+     * Return the customArgs {@link ArrayList}
+     *
+     * @return ArrayList
+     */
+    public function getCustomArgs()
+    {
+        return $this->customArgs;
+    }
+
+    /**
+     * Add a global substitution that applies to all recipients unless overridden with
+     * personalization
+     *
+     * @param string $key
+     * @param string $value
+     *
+     * @throws \RuntimeException
+     *
+     * @return $this
+     */
+    public function addCustomArg($key, $value)
+    {
+        if ($this->customArgs->find('Key', $key)) {
+            throw new \RuntimeException("A customArg already exists with that key [$key]");
+        }
+
+        $this->customArgs->push(ArrayData::create([
+            'Key'   => $key,
+            'Value' => $value
+        ]));
 
         return $this;
     }
