@@ -3,6 +3,7 @@
 namespace Vulcan\SendGrid\Tests;
 
 use SilverStripe\Dev\FunctionalTest;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\View\ArrayData;
@@ -156,5 +157,94 @@ class SendGridTest extends FunctionalTest
         } catch (\Exception $e) {
             $this->assertTrue(true);
         }
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::getErrorMap()
+     */
+    public function testErrorMap()
+    {
+        $this->assertInstanceOf(ArrayList::class, $this->sendGrid->getErrorMap());
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::getErrorDefinition()
+     */
+    public function testErrorDefinition()
+    {
+        $definition = $this->sendGrid->getErrorDefinition(200);
+
+        $this->assertEquals('OK', $definition->Message);
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::isSandbox()
+     * @covers \Vulcan\SendGrid\SendGrid::setSandboxMode()
+     */
+    public function testSandboxMode()
+    {
+        $this->sendGrid->setSandboxMode(true);
+        $this->assertTrue($this->sendGrid->isSandbox());
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::setTemplateId()
+     * @covers \Vulcan\SendGrid\SendGrid::getTemplateId()
+     */
+    public function testTemplateId()
+    {
+        $id = '1234-5678-9123-4567';
+        $this->sendGrid->setTemplateId($id);
+        $this->assertEquals($id, $this->sendGrid->getTemplateId());
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::getApiKey()
+     */
+    public function testGetApiKey()
+    {
+        if ($this->hasApiKey) {
+            $this->assertEquals(getenv('SG_API_KEY'), $this->sendGrid->getApiKey());
+            return;
+        }
+
+        $this->assertEquals('XXXX-XXXX-XXXX-XXXX', $this->sendGrid->getApiKey());
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::setReplyTo()
+     * @covers \Vulcan\SendGrid\SendGrid::getReplyTo()
+     */
+    public function testReplyTo()
+    {
+        $this->sendGrid->setReplyTo('john@doe.com');
+        $this->assertEquals('john@doe.com', $this->sendGrid->getReplyTo());
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::setFrom()
+     * @covers \Vulcan\SendGrid\SendGrid::setFromName()
+     * @covers \Vulcan\SendGrid\SendGrid::getFrom()
+     * @covers \Vulcan\SendGrid\SendGrid::getFromName()
+     */
+    public function testFrom()
+    {
+        $this->sendGrid->setFrom('jane@doe.com');
+        $this->sendGrid->setFromName('Jane Doe');
+
+        $this->assertEquals('jane@doe.com', $this->sendGrid->getFrom());
+        $this->assertEquals('Jane Doe', $this->sendGrid->getFromName());
+    }
+
+    /**
+     * @covers \Vulcan\SendGrid\SendGrid::setSubject()
+     * @covers \Vulcan\SendGrid\SendGrid::getSubject()
+     */
+    public function testSubject()
+    {
+        $subject = 'Where have you been John!';
+        $this->sendGrid->setSubject($subject);
+
+        $this->assertEquals($subject, $this->sendGrid->getSubject());
     }
 }
