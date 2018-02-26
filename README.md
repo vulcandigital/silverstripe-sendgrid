@@ -8,7 +8,7 @@ A module to assist developers in sending template emails via SendGrid
 
 ## Installation
 ```bash
-composer require vulcandigital/silverstripe-sendgrid *
+composer require vulcandigital/silverstripe-sendgrid
 ```
 
 ## Configuration
