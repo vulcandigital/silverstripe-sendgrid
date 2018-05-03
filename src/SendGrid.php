@@ -280,10 +280,6 @@ class SendGrid
             throw new \InvalidArgumentException('You must provide a subject');
         }
 
-        if (!$this->getTemplateId()) {
-            throw new \InvalidArgumentException('You must provide a template id');
-        }
-
         if (!$this->getBody()) {
             throw new \InvalidArgumentException('You must provide a body');
         }
